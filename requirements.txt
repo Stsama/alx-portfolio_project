@@ -2,8 +2,6 @@ flask
 flask-sqlalchemy
 werkzeug
 flask_login
-flask-restful
-flask-marshmallow
-marshmallow-sqlalchemy
 flask-wtf
 email-validator
+validators

@@ -1,75 +1,104 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User, Food, user_food
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from .models import User, Food, Order
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
+import validators  # type: ignore
+from constants.http_status_codes import *
 from flask_login import login_user, login_required, logout_user, current_user
 
 auth = Blueprint('auth', __name__)
 
-@auth.route('/login', methods=['GET', 'POST'])
+@auth.post('/login')
 def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+    email = request.json.get('email', "")
+    password = request.json.get('password', "")
         
-        user = User.query.filter_by(email=email).first()
-        if user:
-            if check_password_hash(user.password, password):
-                flash('Logged In successfully!', category='success')
-                login_user(user, remember=True)
-                if user.profile == 'seller':
-                    return redirect(url_for('views.add_restaurant'))
-                return redirect(url_for('views.home'))
-            else:
-                flash('Email or password may be incorrect try again', category='error')
-        else:
-            flash('Account does not exist', category='error')
-    return render_template('login.html', user=current_user)
-
+    user = User.query.filter_by(email=email).first()
+    if user:
+        if check_password_hash(user.password, password):
+            login_user(user, remember=True)
+            return jsonify({
+                'user':{
+                    'username': user.username,
+                    'email': user.email,
+                    'profile': user.profile
+                }
+            }), HTTP_200_OK
+        
+    return jsonify({'error': 'Wrong credentials'}), HTTP_401_UNAUTHORIZED
+        
 
 @auth.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('auth.login'))
+    return jsonify({'message': 'User logged out successfully'}), HTTP_200_OK
 
 
-@auth.route('/sign_up', methods=['GET', 'POST'])
-def sign_up():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        city = request.form.get('city')
-        area = request.form.get('area')
-        telephone = request.form.get('telephone')
-        profile = request.form.get('profile')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
+@auth.post('/register')
+def register():
+        username = request.json['username']
+        email = request.json['email']
+        # is_admin = request.json['is_admin']
+        profile = request.json['profile']
+        password = request.json['password']
         
         user = User.query.filter_by(email=email).first()
         if user:
-            flash('This email already exist', category='error')
-        elif len(username) < 2:
-            flash('Username must be greater than 2 characters.', category='error')
-        elif len(email) < 4:
-            flash('Email must be greater than 4 characters.', category='error')
-        elif len(city) < 2:
-            flash('City must be greater than 2 characters.', category='error')
-        elif len(area) < 2:
-            flash('Area must be greater than 2 characters.', category='error')
-        elif len(telephone) < 4:
-            flash('Telephone must be greater than 4 characters.', category='error')
-        elif profile == "":
-            flash('You must choose a profile', category='error')
-        elif password != confirm_password:
-            flash('Passwords must match', category='error')
-        elif len(password) < 4:
-           flash('Password must be greater than 4 characters.', category='error')
-        else:
-            new_user = User(username=username, email=email, city=city, area=area, telephone=telephone, profile=profile, password=generate_password_hash(password))
-            db.session.add(new_user)
-            db.session.commit()
+            return jsonify({'error': 'Your email already exists'}), HTTP_409_CONFLICT
+        if len(username) < 2:
+            return jsonify({'error': 'username is too short'}), HTTP_400_BAD_REQUEST
+        if not username.isalnum() or ' ' in username:
+            return jsonify({'error': 'username should be alphanumeric, also no spaces'}), HTTP_400_BAD_REQUEST
+        if not validators.email(email):
+            return jsonify({'error': 'Your email is not valid'}), HTTP_400_BAD_REQUEST
+        if profile == "":
+            return jsonify({'error': 'You must choose a profil'}), HTTP_400_BAD_REQUEST
+        if len(password) < 4:
+          return jsonify({'error': 'password is too short'}), HTTP_400_BAD_REQUEST
+        
+        new_user = User(username=username, email=email, profile=profile, password=generate_password_hash(password))
+        db.session.add(new_user)
+        db.session.commit()
             
-            flash('Account created successfully', category='success')
-            return redirect(url_for('auth.login'))
-    return render_template('sign_up.html', user="")
+        return jsonify({
+            'message': 'user created',
+            'user':{
+                    'username': username, 'email':email, 'profile': profile
+            } 
+        })
+            
+
+@auth.route('/me')
+def get_me():
+    if current_user.is_authenticated:
+        user = current_user
+        return jsonify({
+            'user':{
+                'username': user.username,
+                'email': user.email,
+                'profile': user.profile
+            }
+        }), HTTP_200_OK 
+    return jsonify({'error':'You should login before !!!'}), HTTP_401_UNAUTHORIZED
+
+
+@auth.get('/users')
+@login_required
+def get_all_users():
+    if current_user.is_admin:
+        users = User.query.all()
+        users_data = []
+        for user in users:
+            new={
+                'username':user.username,
+                'email':user.email,
+                'profile':user.profile
+            }
+            users_data.append(new)
+        return jsonify({
+            'users': users_data
+        }), HTTP_200_OK
+    else:
+        return jsonify({'error': 'You are not allowed to check this page'}), HTTP_401_UNAUTHORIZED
+    

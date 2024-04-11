@@ -16,13 +16,18 @@ def create_app():
     
     from .views import views
     from .auth import auth
-    # from .api import api
+    from .foods import foods
+    from .orders import orders
+    from .restaurants import restaurants
     
     app.register_blueprint(views, url_prefix="/")
-    app.register_blueprint(auth, url_prefix="/")
+    app.register_blueprint(auth, url_prefix="/api/v1/auth")
+    app.register_blueprint(foods, url_prefix="/api/v1/foods")
+    app.register_blueprint(orders, url_prefix="/api/v1/orders")
+    app.register_blueprint(restaurants, url_prefix="/api/v1/restaurants")
     # app.register_blueprint(api, url_prefix="/api/v1/ressorces")
     
-    from .models import Food, User, user_food
+    from .models import Food, User, Order
     
     create_database(app)
     
