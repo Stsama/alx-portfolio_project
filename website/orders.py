@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from .models import User, Food, Order
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
@@ -8,6 +8,8 @@ from flask_login import login_user, login_required, logout_user, current_user
 
 orders = Blueprint('orders', __name__)
 
+
+# get all the orders with the need for admin authentication
 @orders.get('/')
 @login_required
 def get_orders():
@@ -28,7 +30,8 @@ def get_orders():
     else:
             return jsonify({'error': 'You are not allowed to check this page'}), HTTP_401_UNAUTHORIZED
     
-    
+
+# get a single order with the need of admin authentication    
 @orders.get('/<int:id>')
 @login_required
 def get_order(id):
@@ -50,6 +53,7 @@ def get_order(id):
         return jsonify({'error': 'You are not allowed to check this page'}), HTTP_401_UNAUTHORIZED
         
 
+# post a single order with the need of user authentication 
 @orders.post('/<int:id>')
 @login_required
 def order_food(id):

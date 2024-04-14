@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from .models import User, Food, Order
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
@@ -7,7 +7,7 @@ from constants.http_status_codes import *
 from flask_login import login_user, login_required, logout_user, current_user
 
 restaurants = Blueprint('restaurants', __name__)
-
+# get all the restaurants with no need for authentication
 @restaurants.get('/')
 def get_all_restaurants():
     users = User.query.filter_by(profile="seller").all()
@@ -23,7 +23,8 @@ def get_all_restaurants():
     return jsonify({
         'restaurants': users_data
     }), HTTP_200_OK
-    
+ 
+# get a single restaurant providing an Id with no need for authentication 
 @restaurants.get('/<int:id>')
 def get_a_restaurants(id):
     
@@ -42,6 +43,7 @@ def get_a_restaurants(id):
     }), HTTP_200_OK
     
 
+# delete a single restaurant providing an Id with the need for authentication 
 @restaurants.delete('/<int:id>')
 @login_required
 def delete_a_restaurants(id):

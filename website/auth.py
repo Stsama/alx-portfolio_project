@@ -8,6 +8,9 @@ from flask_login import login_user, login_required, logout_user, current_user
 
 auth = Blueprint('auth', __name__)
 
+# allows a user to log in in his account and gives
+# a token that will allow a user to stay connected for a cartain time
+ 
 @auth.post('/login')
 def login():
     email = request.json.get('email', "")
@@ -28,6 +31,7 @@ def login():
     return jsonify({'error': 'Wrong credentials'}), HTTP_401_UNAUTHORIZED
         
 
+# The user can logout and the tken will be destroyed
 @auth.route('/logout')
 @login_required
 def logout():
@@ -35,6 +39,8 @@ def logout():
     return jsonify({'message': 'User logged out successfully'}), HTTP_200_OK
 
 
+# allows a user to sign up  and gives
+# a token that will allow a user to stay connected for a cartain time
 @auth.post('/register')
 def register():
         username = request.json['username']
@@ -68,7 +74,7 @@ def register():
             } 
         })
             
-
+# The user will  see his informations 
 @auth.route('/me')
 def get_me():
     if current_user.is_authenticated:
@@ -82,7 +88,7 @@ def get_me():
         }), HTTP_200_OK 
     return jsonify({'error':'You should login before !!!'}), HTTP_401_UNAUTHORIZED
 
-
+# only for the admin! the admin will see all the users
 @auth.get('/users')
 @login_required
 def get_all_users():

@@ -2,7 +2,18 @@ from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
 
+
+
 class Food(db.Model):
+    """Represent a class Food
+
+    Args:
+        db (database): the database of the application
+        id
+        name
+        price
+        description
+    """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150))
     price = db.Column(db.Float())
@@ -16,6 +27,12 @@ class Food(db.Model):
 
 
 class User(db.Model, UserMixin):
+    """User class
+
+    Args:
+        db (_type_): _description_
+        UserMixin (_type_): _description_
+    """
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150))
     email = db.Column(db.String(150), unique=True)
@@ -30,6 +47,11 @@ class User(db.Model, UserMixin):
     
     
 class Order(db.Model):
+    """Orders
+
+    Args:
+        db (_type_): _description_
+    """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     food_id = db.Column(db.Integer, db.ForeignKey('food.id'))

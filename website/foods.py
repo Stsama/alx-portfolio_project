@@ -1,6 +1,5 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from .models import User, Food, Order
-from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 import validators  # type: ignore
 from constants.http_status_codes import *
