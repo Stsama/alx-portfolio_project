@@ -1,5 +1,7 @@
 Here is the portfolio project that we're asked to come up with during the alx evaluation
 
+![alx-2](https://github.com/Stsama/alx-portfolio_project/assets/103574573/f720c4cb-9870-44f9-8d07-dc71bafe662e)
+
 
 # The project name is FeedMe
 
