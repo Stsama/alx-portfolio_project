@@ -28,6 +28,10 @@ The API development has involved more than just my writing code; it requires tho
 Authors:
 - Albert EZOULA (StSama) LinkedIn : https://www.linkedin.com/in/albert-ezoula-1295bb227/
 
+here is the link of the documentation of the API
+
+https://docs.google.com/document/d/1QkIr12Al3MlyxmeYEDKgfMLouET6wGMLzfXn8Z0nhxA/edit?usp=sharing
+
 # commands
 - virtualenv .venv -p python3
 - source .venv/bin/activate
